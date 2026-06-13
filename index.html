@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📞 My Offline Caller</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        h1 {
+            text-align: center;
+            color: #f1c40f;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            background: #ffffff;
+            color: #222;
+            margin: 8px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 19px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            margin: 8px 0;
+        }
+
+        .btn-call {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-call:hover {
+            background: #229954;
+            box-shadow: 0 0 12px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-save {
+            background: #2980b9;
+            color: white;
+        }
+        .btn-save:hover {
+            background: #2471a3;
+        }
+
+        .contact-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .contact-info {
+            font-size: 17px;
+        }
+
+        .btn-small {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 15px;
+        }
+
+        .divider {
+            height: 2px;
+            background: rgba(255,255,255,0.15);
+            margin: 25px 0;
+        }
+
+        .note {
+            text-align: center;
+            font-size: 14px;
+            color: #bdc3c7;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📞 My Offline Caller</h1>
+
+    <!-- Manual Dial -->
+    <div class="input-group">
+        <input type="tel" id="phoneNumber" placeholder="Enter phone number (e.g. 09171234567)">
+        <button class="btn-call" onclick="makeCall()">📞 Call Now</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Save Contact -->
+    <h3>💾 Save New Contact</h3>
+    <input type="text" id="contactName" placeholder="Contact Name">
+    <input type="tel" id="contactNumber" placeholder="Phone Number">
+    <button class="btn-save" onclick="saveContact()">✅ Save Contact</button>
+
+    <div class="divider"></div>
+
+    <!-- Saved Contacts -->
+    <h3>👤 Saved Contacts</h3>
+    <div id="contactsList">
+        <p style="text-align:center; color:#bdc3c7;">No contacts saved yet.</p>
+    </div>
+
+    <p class="note">💡 Works 100% offline. Uses your phone's regular call function.</p>
+</div>
+
+<script>
+// Load saved contacts from local storage
+let contacts = JSON.parse(localStorage.getItem("offlineContacts")) || [];
+
+// Make call using phone's dialer
+function makeCall(number = null) {
+    const numToCall = number || document.getElementById("phoneNumber").value.trim();
+    if (!numToCall) {
+        alert("Please enter a valid number!");
+        return;
+    }
+    // Opens your phone's built-in call screen
+    window.location.href = tel:${numToCall};
+}
+
+// Save new contact
+function saveContact() {
+    const name = document.getElementById("contactName").value.trim();
+    const number = document.getElementById("contactNumber").value.trim();
+    if (!name || !number) {
+        alert("Fill both name and number!");
+        return;
+    }
+    contacts.push({ name, number });
+    localStorage.setItem("offlineContacts", JSON.stringify(contacts));
+    renderContacts();
+    document.getElementById("contactName").value = "";
+    document.getElementById("contactNumber").value = "";
+    alert("✅ Contact saved!");
+}
+
+// Show all saved contacts
+function renderContacts() {
+    const list = document.getElementById("contactsList");
+    if (contacts.length === 0) {
+        list.innerHTML = <p style="text-align:center; color:#bdc3c7;">No contacts saved yet.</p>;
+        return;
+    }
+    list.innerHTML = "";
+    contacts.forEach((contact, index) => {
+        const div = document.createElement("div");
+        div.className = "contact-item";
+        div.innerHTML = `
+            <div class="contact-info">
+                <strong>${contact.name}</strong><br>
+                ${contact.number}
+            </div>
+            <div>
+                <button class="btn-call btn-small" onclick="makeCall('${contact.number}')">📞 Call</button>
+                <button class="btn-small" style="background:#e74c3c; color:white;" onclick="deleteContact(${index})">🗑️</button>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+// Delete contact
+function deleteContact(index) {
+    if (confirm("Delete this contact?")) {
+        contacts.splice(index, 1);
+        localStorage.setItem("offlineContacts", JSON.stringify(contacts));
+        renderContacts();
+    }
+}
+
+// Show contacts when app opens
+renderContacts();
+</script>
+
+</body>
+</html>
